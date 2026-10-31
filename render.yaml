@@ -1,0 +1,47 @@
+# One-click deploy on Render: New + -> Blueprint -> pick this GitHub repo.
+services:
+  - type: web
+    name: mom-bot
+    runtime: node
+    plan: starter            # a persistent disk needs a paid instance
+    buildCommand: echo "No build step needed"
+    startCommand: node server.js
+    healthCheckPath: /health
+    disk:
+      name: mom-bot-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATA_FILE
+        value: /var/data/data.json
+      - key: TIMEZONE
+        value: Asia/Kolkata
+      - key: RECALL_REGION
+        value: us-west-2
+      - key: LLM_PROVIDER
+        value: anthropic
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        sync: false
+      - key: RECALL_API_KEY
+        sync: false
+      - key: RECALL_VERIFICATION_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ALLOWED_EMAIL_DOMAINS
+        sync: false
+      # Optional: calendar sign-in buttons (calendar links work without these)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: MICROSOFT_CLIENT_ID
+        sync: false
+      - key: MICROSOFT_CLIENT_SECRET
+        sync: false

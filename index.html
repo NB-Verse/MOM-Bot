@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>MOM Bot</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Crect x='16' y='20' width='32' height='26' rx='7' fill='white'/%3E%3Ccircle cx='26' cy='33' r='3.5' fill='%230f766e'/%3E%3Ccircle cx='38' cy='33' r='3.5' fill='%230f766e'/%3E%3Crect x='30' y='10' width='4' height='10' rx='2' fill='white'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f5f6f4; --panel:#ffffff; --ink:#16201d; --muted:#5d6a66; --line:#dfe4e1; --soft:#eef2f0;
+  --accent:#0f766e; --accent-ink:#ffffff; --accent-soft:#e1f2ef;
+  --warn:#9a5b00; --warn-soft:#fff4dd; --bad:#b42318; --bad-soft:#fdecea; --good:#137a3f; --good-soft:#e5f5eb;
+  --shadow:0 1px 2px rgba(16,24,20,.06),0 4px 16px rgba(16,24,20,.05); --radius:12px;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1413; --panel:#161d1b; --ink:#e7eeeb; --muted:#9aa8a3; --line:#27312e; --soft:#1c2522;
+  --accent:#2bb3a3; --accent-ink:#04201c; --accent-soft:#143430;
+  --warn:#f0b54a; --warn-soft:#2e2412; --bad:#ff8a7a; --bad-soft:#3a1b17; --good:#5fd38e; --good-soft:#15301f;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+a{color:var(--accent)}
+button,input,textarea,select{font:inherit;color:inherit}
+header.top{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.top .in{max-width:1040px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
+.top nav{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.top nav a{padding:6px 10px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:500}
+.top nav a.on,.top nav a:hover{background:var(--soft);color:var(--ink)}
+main{max-width:1040px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:24px;line-height:1.25;margin:0 0 4px;letter-spacing:-.015em}
+h2{font-size:17px;margin:0 0 12px}
+.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:18px}
+.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+label{display:block;font-weight:600;font-size:13px;margin:12px 0 6px}
+label .opt{font-weight:400;color:var(--muted)}
+input[type=text],input[type=email],input[type=password],input[type=url],input[type=datetime-local],input[type=number],textarea,select{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel);outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+textarea{resize:vertical;min-height:90px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);padding:9px 14px;border-radius:9px;cursor:pointer;font-weight:600;text-decoration:none;color:var(--ink);white-space:nowrap}
+.btn:hover{background:var(--soft)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--bad)}
+.btn.small{padding:6px 10px;font-size:13px}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:8px 14px;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--accent-soft);color:var(--accent)}
+.notice{border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:14px;border:1px solid transparent}
+.notice.warn{background:var(--warn-soft);color:var(--warn)}
+.notice.bad{background:var(--bad-soft);color:var(--bad)}
+.notice.good{background:var(--good-soft);color:var(--good)}
+.notice.info{background:var(--accent-soft);color:var(--accent)}
+.list{display:flex;flex-direction:column}
+.item{display:flex;gap:14px;align-items:center;padding:13px 4px;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.item:first-child{border-top:0}
+.item:hover .t{color:var(--accent)}
+.item .t{font-weight:600}
+.item .m{font-size:13px;color:var(--muted)}
+.item .grow{flex:1;min-width:0}
+.item .t,.item .m{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.chip.live{background:var(--accent-soft);color:var(--accent)}
+.chip.done{background:var(--good-soft);color:var(--good)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.wait{background:var(--warn-soft);color:var(--warn)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.chip.live .dot{animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.empty{color:var(--muted);text-align:center;padding:26px 8px}
+.steps{display:flex;gap:6px;margin:16px 0 4px;flex-wrap:wrap}
+.step{flex:1;min-width:92px;font-size:12px;color:var(--muted)}
+.step .bar{height:5px;border-radius:9px;background:var(--line);margin-bottom:6px}
+.step.done .bar{background:var(--accent)}
+.step.cur .bar{background:linear-gradient(90deg,var(--accent) 50%,var(--line) 50%);background-size:200% 100%;animation:slide 1.6s linear infinite}
+.step.cur{color:var(--ink);font-weight:600}
+@keyframes slide{from{background-position:100% 0}to{background-position:0 0}}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 -20px 16px;padding:0 20px}
+.tabs button{border:0;background:none;padding:10px 12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--ink);border-color:var(--accent)}
+.doc{font-size:15px}
+.doc h1{font-size:22px;margin:0 0 12px}
+.doc h2{font-size:17px;margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.doc h3{font-size:15px;margin:16px 0 6px}
+.doc p{margin:8px 0}
+.doc ul,.doc ol{margin:6px 0;padding-left:22px}
+.doc li{margin:3px 0}
+.doc table{border-collapse:collapse;width:100%;margin:8px 0;font-size:14px;display:block;overflow-x:auto}
+.doc th,.doc td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+.doc th{background:var(--soft)}
+.doc hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+.doc code{font-family:var(--mono);font-size:13px;background:var(--soft);padding:1px 5px;border-radius:5px}
+.tx{max-height:70vh;overflow:auto}
+.tx .ln{display:grid;grid-template-columns:62px 1fr;gap:10px;padding:8px 0;border-top:1px solid var(--soft)}
+.tx .tm{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:2px}
+.tx .sp{font-weight:700;font-size:13px}
+.mdedit{font-family:var(--mono);font-size:13px;min-height:420px}
+.timeline{font-size:13px;color:var(--muted);margin:0;padding-left:18px}
+.timeline li{margin:2px 0}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;word-break:break-all}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.center{min-height:70vh;display:grid;place-items:center}
+.hero h1{font-size:26px}
+.pastebox{display:flex;gap:8px}
+.pastebox input{flex:1;font-size:16px;padding:13px 14px}
+.pastebox .btn{padding:12px 20px;font-size:15px}
+@media (max-width:560px){.pastebox{flex-direction:column}.pastebox .btn{justify-content:center}}
+.switch{position:relative;display:inline-block;width:42px;height:24px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch span{position:absolute;inset:0;background:var(--line);border-radius:24px;transition:.15s;cursor:pointer}
+.switch span:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.switch input:checked+span{background:var(--accent)}
+.switch input:checked+span:before{transform:translateX(18px)}
+.switch input:focus-visible+span{box-shadow:0 0 0 3px var(--accent-soft)}
+.connect{display:flex;gap:10px;flex-wrap:wrap}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:18px 0 4px}
+.or:before,.or:after{content:"";flex:1;border-top:1px solid var(--line)}
+details.help{margin-top:8px;font-size:13.5px}
+details.help summary{cursor:pointer;color:var(--accent);font-weight:600}
+details.help ol{padding-left:18px;margin:8px 0}
+.auth{width:100%;max-width:400px}
+.auth .card{padding:26px}
+table.plain{width:100%;border-collapse:collapse;font-size:14px}
+table.plain th,table.plain td{text-align:left;padding:9px 6px;border-top:1px solid var(--line);vertical-align:middle}
+table.plain th{color:var(--muted);font-weight:600;font-size:12.5px;border-top:0}
+.linkbox{display:flex;gap:8px;margin-top:10px}
+.linkbox input{font-family:var(--mono);font-size:12.5px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:50;box-shadow:var(--shadow);max-width:90vw}
+.spin{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:rot .8s linear infinite;display:inline-block}
+@keyframes rot{to{transform:rotate(360deg)}}
+.muted{color:var(--muted)}
+.mt0{margin-top:0}
+.brand{white-space:nowrap}
+@media (max-width:560px){.top .in{flex-wrap:wrap;gap:6px}.top nav{margin-left:0;width:100%;gap:2px}.top nav a{padding:5px 8px;font-size:14px}main{padding:16px 12px 48px}.card{padding:16px}.tabs{margin:0 -16px 14px;padding:0 16px}.kv{grid-template-columns:1fr}}
+@media print{
+  body.printing header.top, body.printing .noprint{display:none!important}
+  body.printing main{padding:0;max-width:none}
+  body.printing .card{border:0;box-shadow:none;padding:0}
+  body.printing .doc{color:#000}
+}
+</style>
+</head>
+<body>
+<header class="top noprint" id="top" hidden>
+  <div class="in">
+    <a class="brand" href="#/"><span class="logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="13" rx="4" fill="white"/><circle cx="9" cy="13.5" r="1.7" fill="#0f766e"/><circle cx="15" cy="13.5" r="1.7" fill="#0f766e"/><rect x="11" y="2" width="2" height="5" rx="1" fill="white"/></svg></span>MOM Bot</a>
+    <nav id="nav"></nav>
+  </div>
+</header>
+<main id="app"><div class="center"><span class="spin"></span></div></main>
+
+<script>
+'use strict';
+const state = { me: null, config: null, timer: null, view: null };
+const app = document.getElementById('app');
+
+/* ---------- helpers ---------- */
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const go = (hash) => { if (location.hash === hash) render(); else location.hash = hash; };
+function toast(msg, ms = 2600) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), ms);
+}
+async function api(method, url, body) {
+  let res;
+  try {
+    res = await fetch(url, {
+      method, credentials: 'same-origin',
+      headers: { 'content-type': 'application/json', 'x-requested-with': 'mombot' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch { throw new Error('Cannot reach the server. Check your connection.'); }
+  let data = null; try { data = await res.json(); } catch {}
+  if (!res.ok) {
+    if (res.status === 401 && state.me && url !== '/api/me' && !url.startsWith('/api/login') && !url.startsWith('/api/register')) {
+      state.me = null; // session expired while using the app
+      if (!location.hash.startsWith('#/register')) setTimeout(() => go('#/login'), 0);
+    }
+    throw new Error((data && data.error) || `Request failed (${res.status}).`);
+  }
+  return data;
+}
+function fmt(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+function ago(iso) {
+  const s = (Date.now() - new Date(iso)) / 1000;
+  if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s / 60) + ' min ago';
+  if (s < 86400) return Math.floor(s / 3600) + ' h ago'; return fmt(iso);
+}
+function busy(btn, on, label) {
+  if (!btn) return;
+  if (on) { btn.dataset.label = btn.innerHTML; btn.disabled = true; btn.innerHTML = `<span class="spin"></span>${label ? ' ' + esc(label) : ''}`; }
+  else { btn.disabled = false; if (btn.dataset.label) btn.innerHTML = btn.dataset.label; }
+}
+function formData(form) { return Object.fromEntries(new FormData(form).entries()); }
+function showError(el, msg) { el.innerHTML = msg ? `<div class="notice bad">${esc(msg)}</div>` : ''; }
+function download(name, content, type) {
+  const blob = new Blob([content], { type }); const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+const slug = (s) => String(s || 'meeting').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'meeting';
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); toast('Copied'); }
+  catch { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('Copied'); }
+}
+
+/* ---------- tiny markdown renderer (input is escaped first) ---------- */
+function inline(s) {
+  return s.replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[\s(])_([^_]+)_(?=[\s).,;:!?]|$)/g, '$1<em>$2</em>')
+    .replace(/(^|[\s(])\*([^*]+)\*(?=[\s).,;:!?]|$)/g, '$1<em>$2</em>');
+}
+function md(src) {
+  const lines = esc(src).replace(/\r/g, '').split('\n');
+  const out = []; let i = 0;
+  const cells = (l) => l.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map((c) => inline(c.trim().replace(/\\\|/g, '|')));
+  while (i < lines.length) {
+    const l = lines[i];
+    if (!l.trim()) { i++; continue; }
+    let m;
+    if ((m = l.match(/^(#{1,4})\s+(.*)$/))) { const n = m[1].length; out.push(`<h${n}>${inline(m[2])}</h${n}>`); i++; continue; }
+    if (/^\s*(-{3,}|\*{3,})\s*$/.test(l)) { out.push('<hr>'); i++; continue; }
+    if (/^\s*\|/.test(l) && lines[i + 1] && /^\s*\|?\s*:?-{2,}/.test(lines[i + 1])) {
+      const head = cells(l); i += 2; const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(cells(lines[i++]));
+      out.push(`<table><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
+      continue;
+    }
+    if (/^\s*[-*]\s+/.test(l)) {
+      const items = []; while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) items.push(inline(lines[i++].replace(/^\s*[-*]\s+/, '')));
+      out.push(`<ul>${items.map((x) => `<li>${x}</li>`).join('')}</ul>`); continue;
+    }
+    if (/^\s*\d+[.)]\s+/.test(l)) {
+      const items = []; while (i < lines.length && /^\s*\d+[.)]\s+/.test(lines[i])) items.push(inline(lines[i++].replace(/^\s*\d+[.)]\s+/, '')));
+      out.push(`<ol>${items.map((x) => `<li>${x}</li>`).join('')}</ol>`); continue;
+    }
+    const para = [];
+    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|\s*[-*]\s+|\s*\d+[.)]\s+|\s*\||\s*-{3,}\s*$)/.test(lines[i])) para.push(lines[i++].replace(/\s{2,}$/, '<br>'));
+    if (para.length) out.push(`<p>${inline(para.join(' ').replace(/<br> /g, '<br>'))}</p>`); else i++;
+  }
+  return out.join('\n');
+}
+function mdToPlain(src) {
+  return String(src).replace(/^#{1,4}\s+/gm, '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/(^|\s)_([^_]+)_/g, '$1$2')
+    .replace(/^\|?[-:| ]{4,}\|?$/gm, '').replace(/^\|\s*/gm, '').replace(/\s*\|\s*$/gm, '').replace(/\s*\|\s*/g, ' | ').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/* ---------- stage display ---------- */
+const STEPS = [['scheduled', 'Scheduled'], ['joining', 'Joining'], ['in_call', 'In meeting'], ['recording', 'Recording'], ['transcribing', 'Transcribing'], ['generating', 'Writing MOM'], ['completed', 'MOM ready']];
+const STEP_INDEX = { dispatching: 0, scheduled: 0, joining: 1, waiting_room: 1, in_call: 2, recording: 3, processing: 4, transcribing: 4, generating: 5, completed: 6 };
+const ACTIVE = (s) => !['completed', 'failed', 'cancelled'].includes(s);
+function chip(m) {
+  const cls = m.stage === 'completed' ? 'done' : m.stage === 'failed' ? 'bad' : m.stage === 'cancelled' ? '' : (m.stage === 'waiting_room' || m.stage === 'scheduled') ? 'wait' : 'live';
+  const label = { completed: 'MOM ready', failed: 'Failed', cancelled: 'Cancelled', scheduled: 'Scheduled', waiting_room: 'In lobby', recording: 'Recording', generating: 'Writing MOM', transcribing: 'Transcribing', processing: 'Processing', joining: 'Joining', in_call: 'In meeting', dispatching: 'Sending' }[m.stage] || m.stage;
+  return `<span class="chip ${cls}"><span class="dot"></span>${esc(label)}</span>`;
+}
+
+/* ---------- router ---------- */
+window.addEventListener('hashchange', render);
+async function render() {
+  clearInterval(state.timer); state.timer = null;
+  const hash = location.hash || '#/';
+  const [hpath, hquery] = hash.replace(/^#\/?/, '').split('?');
+  const parts = hpath.split('/');
+  state.query = new URLSearchParams(hquery || '');
+  try {
+    if (!state.config) state.config = await api('GET', '/api/config').catch(() => ({}));
+    if (parts[0] === 'register') return viewRegister(parts[1] || '');
+    if (!state.me) {
+      try { state.me = (await api('GET', '/api/me')).user; } catch { state.me = null; }
+    }
+    if (!state.me) return viewLogin();
+    state.config = await api('GET', '/api/config').catch(() => state.config);
+    drawNav(parts[0]);
+    if (parts[0] === 'm' && parts[1]) return viewMeeting(parts[1]);
+    if (parts[0] === 'admin') return viewAdmin();
+    if (parts[0] === 'account') return viewAccount();
+    if (parts[0] === 'notetaker') return viewNotetaker();
+    if (parts[0] === 'import') return viewImport();
+    return viewHome();
+  } catch (e) {
+    app.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`;
+  }
+}
+function drawNav(active) {
+  document.getElementById('top').hidden = false;
+  const me = state.me;
+  document.getElementById('nav').innerHTML = `
+    <a href="#/" class="${!active || active === 'm' ? 'on' : ''}">Meetings</a>
+    <a href="#/notetaker" class="${active === 'notetaker' ? 'on' : ''}">Calendar &amp; bot</a>
+    <a href="#/import" class="${active === 'import' ? 'on' : ''}">Import</a>
+    ${me.role === 'admin' ? `<a href="#/admin" class="${active === 'admin' ? 'on' : ''}">Team &amp; invites</a>` : ''}
+    <a href="#/account" class="${active === 'account' ? 'on' : ''}" title="${esc(me.email)}">${esc(me.name.split(' ')[0])}</a>`;
+}
+
+/* ---------- auth views ---------- */
+function viewLogin() {
+  document.getElementById('top').hidden = true;
+  const setup = state.config && state.config.needsSetup;
+  app.innerHTML = `<div class="center"><div class="auth">
+    <div class="row" style="justify-content:center;margin-bottom:18px"><span class="brand" style="font-size:20px"><span class="logo" style="width:36px;height:36px">${document.querySelector('.brand .logo').innerHTML}</span>MOM Bot</span></div>
+    <div class="card">
+      <h1>Sign in</h1>
+      <p class="sub">Invite-only AI notetaker for your team meetings.</p>
+      ${setup ? '<div class="notice warn">No accounts exist yet. The server administrator must set ADMIN_EMAIL and ADMIN_PASSWORD and restart.</div>' : ''}
+      <div id="err"></div>
+      <form id="f" autocomplete="on">
+        <label for="email">Work email</label><input id="email" name="email" type="email" required autocomplete="username">
+        <label for="password">Password</label><input id="password" name="password" type="password" required autocomplete="current-password">
+        <div style="margin-top:18px"><button class="btn primary" style="width:100%;justify-content:center">Sign in</button></div>
+      </form>
+      <p class="hint" style="margin-top:14px">No account? Access is by invitation — ask your team admin for an invite link.</p>
+    </div></div></div>`;
+  const f = document.getElementById('f');
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const btn = f.querySelector('button'); busy(btn, true);
+    try { state.me = (await api('POST', '/api/login', formData(f))).user; go('#/'); }
+    catch (err) { showError(document.getElementById('err'), err.message); }
+    finally { busy(btn, false); }
+  };
+}
+
+async function viewRegister(token) {
+  document.getElementById('top').hidden = true;
+  let inv;
+  try { inv = await api('GET', `/api/invites/${encodeURIComponent(token)}`); }
+  catch (e) {
+    app.innerHTML = `<div class="center"><div class="auth"><div class="card"><h1>Invite problem</h1><div class="notice bad">${esc(e.message)}</div><a class="btn" href="#/login">Go to sign in</a></div></div></div>`;
+    return;
+  }
+  app.innerHTML = `<div class="center"><div class="auth"><div class="card">
+    <h1>Join your team</h1>
+    <p class="sub">You've been invited to MOM Bot${inv.role === 'admin' ? ' as an <b>admin</b>' : ''}. Create your account.</p>
+    <div id="err"></div>
+    <form id="f">
+      <label for="name">Full name</label><input id="name" name="name" type="text" required maxlength="100" autocomplete="name">
+      <label for="email">Work email</label><input id="email" name="email" type="email" required ${inv.email ? `value="${esc(inv.email)}" readonly` : ''} autocomplete="username">
+      <label for="password">Password <span class="opt">(10+ characters)</span></label><input id="password" name="password" type="password" minlength="10" required autocomplete="new-password">
+      <div style="margin-top:18px"><button class="btn primary" style="width:100%;justify-content:center">Create account</button></div>
+    </form>
+    <p class="hint">Invite expires ${esc(fmt(inv.expiresAt))}.</p>
+  </div></div></div>`;
+  const f = document.getElementById('f');
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const btn = f.querySelector('button'); busy(btn, true);
+    try { state.me = (await api('POST', '/api/register', { ...formData(f), token })).user; toast('Welcome aboard!'); go('#/'); }
+    catch (err) { showError(document.getElementById('err'), err.message); }
+    finally { busy(btn, false); }
+  };
+}
+
+/* ---------- home ---------- */
+function configNotices() {
+  const c = state.config || {}; const n = [];
+  if (!c.recallConfigured) n.push('The meeting bot service is not configured (RECALL_API_KEY). The bot cannot join meetings yet.');
+  if (c.recallConfigured && !c.webhookVerificationConfigured) n.push('RECALL_VERIFICATION_SECRET is missing — bot status updates will be rejected.');
+  if (!c.aiConfigured) n.push('The AI model is not configured — minutes cannot be written yet.');
+  if (!n.length) return '';
+  return `<div class="notice warn"><b>Setup needed.</b> ${n.map(esc).join(' ')} ${state.me.role === 'admin' ? 'See README.md.' : 'Please tell your administrator.'}</div>`;
+}
+
+async function viewHome() {
+  const botName = state.me.botName;
+  let calLine = '';
+  try {
+    const c = await api('GET', '/api/calendar');
+    const cal = c.calendar;
+    calLine = cal
+      ? `<div class="hint" style="margin-top:12px">📅 Calendar connected — <b>${esc(botName)}</b> ${cal.autoJoin === 'manual' ? 'joins the meetings you pick' : 'joins every meeting with a Teams/Zoom/Meet link automatically'}. <a href="#/notetaker">Manage</a></div>`
+      : `<div class="hint" style="margin-top:12px">Tip: <a href="#/notetaker">connect your calendar</a> and the bot joins your meetings automatically — no pasting needed.</div>`;
+  } catch {}
+  app.innerHTML = `
+    ${configNotices()}
+    <div class="card hero">
+      <h1>Send ${esc(botName)} to a meeting</h1>
+      <p class="sub" style="margin-bottom:14px">Paste a Teams, Zoom, Google Meet or Webex link. The bot joins, takes notes and writes the minutes.</p>
+      <div id="err"></div>
+      <form id="f">
+        <div class="pastebox">
+          <input id="meetingUrl" name="meetingUrl" type="text" inputmode="url" required placeholder="Paste meeting link here" autocomplete="off" aria-label="Meeting link">
+          <button class="btn primary" id="go">Join now</button>
+        </div>
+        <details id="more" style="margin-top:12px">
+          <summary class="hint" style="cursor:pointer">Add a title, agenda or schedule for later</summary>
+          <label for="title">Meeting title <span class="opt">(optional)</span></label>
+          <input id="title" name="title" type="text" maxlength="200" placeholder="e.g. Weekly client sync">
+          <label for="agenda">Agenda <span class="opt">(optional, improves the MOM)</span></label>
+          <textarea id="agenda" name="agenda" maxlength="5000" placeholder="One item per line"></textarea>
+          <label for="joinAt">Join later at <span class="opt">(leave empty to join now)</span></label>
+          <input id="joinAt" name="joinAt" type="datetime-local">
+        </details>
+      </form>
+      ${calLine}
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 class="mt0" style="margin:0">Your meetings</h2><span class="hint" id="upd"></span></div>
+      <div id="list" class="list"><div class="empty"><span class="spin"></span></div></div>
+    </div>`;
+  const f = document.getElementById('f');
+  const ja = document.getElementById('joinAt');
+  ja.oninput = () => { document.getElementById('go').textContent = ja.value ? 'Schedule' : 'Join now'; };
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const btn = document.getElementById('go'); busy(btn, true, 'Sending…');
+    const d = formData(f);
+    const body = { meetingUrl: d.meetingUrl, title: d.title, agenda: d.agenda };
+    if (d.joinAt) body.joinAt = new Date(d.joinAt).toISOString();
+    try { const r = await api('POST', '/api/meetings', body); toast(body.joinAt ? 'Bot scheduled' : 'Bot is on its way'); go(`#/m/${r.meeting.id}`); }
+    catch (err) { showError(document.getElementById('err'), err.message); }
+    finally { busy(btn, false); }
+  };
+  await loadList();
+  state.timer = setInterval(loadList, 10000);
+}
+
+async function loadList() {
+  const el = document.getElementById('list'); if (!el) return;
+  try {
+    const { meetings } = await api('GET', '/api/meetings');
+    el.innerHTML = meetings.length ? meetings.map((m) => `
+      <a class="item" href="#/m/${esc(m.id)}">
+        <div class="grow"><div class="t">${m.source === 'calendar' ? '📅 ' : ''}${esc(m.title)}</div>
+        <div class="m">${esc(m.platform)} · ${esc(m.joinAt && m.stage === 'scheduled' ? 'joins ' + fmt(m.joinAt) : ago(m.createdAt))}${state.me.role === 'admin' && m.ownerEmail !== state.me.email ? ' · ' + esc(m.ownerName) : ''}</div></div>
+        ${chip(m)}
+      </a>`).join('') : '<div class="empty">No meetings yet. Send the bot to your next meeting.</div>';
+    const u = document.getElementById('upd'); if (u) u.textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch (e) { el.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; }
+}
+
+/* ---------- meeting detail ---------- */
+async function viewMeeting(id) {
+  state.view = { id, tab: 'mom', editing: false };
+  app.innerHTML = '<div class="empty"><span class="spin"></span></div>';
+  await drawMeeting(true);
+}
+
+async function drawMeeting(first) {
+  const v = state.view; if (!v) return;
+  let m;
+  try { m = (await api('GET', `/api/meetings/${encodeURIComponent(v.id)}`)).meeting; }
+  catch (e) { app.innerHTML = `<div class="notice bad">${esc(e.message)}</div><a class="btn" href="#/">Back to meetings</a>`; return; }
+  if (!location.hash.startsWith(`#/m/${v.id}`)) return;
+  if (v.editing && !first) return; // don't clobber the editor
+  v.m = m;
+  const idx = STEP_INDEX[m.stage] ?? -1;
+  const steps = m.manual ? '' : `<div class="steps">${STEPS.map(([k, label], i) => {
+    const cls = m.stage === 'completed' || i < idx ? 'done' : (i === idx && ACTIVE(m.stage) ? 'cur' : '');
+    return `<div class="step ${cls}"><div class="bar"></div>${esc(label)}</div>`; }).join('')}</div>`;
+  const lobby = m.stage === 'waiting_room' ? `<div class="notice warn"><b>Action needed:</b> admit “${esc(m.botName || state.me.botName)}” from the meeting lobby / waiting room.</div>` : '';
+  const err = m.error ? `<div class="notice bad">${esc(m.error)}</div>` : '';
+  const warns = (m.warnings || []).map((w) => `<div class="notice warn">${esc(w)}</div>`).join('');
+  const hasMom = !!m.momMarkdown;
+
+  app.innerHTML = `
+    <div class="noprint"><a href="#/" class="hint" style="text-decoration:none">← All meetings</a></div>
+    <div class="card noprint">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div style="min-width:0"><h1>${esc(m.title)}</h1><div class="muted" style="font-size:14px">${esc(m.platform)} · created ${esc(fmt(m.createdAt))}${m.joinAt ? ' · join time ' + esc(fmt(m.joinAt)) : ''}</div></div>
+        <div>${chip(m)}</div>
+      </div>
+      ${steps}
+      <p style="margin:10px 0 0;font-weight:600">${esc(m.stageLabel)}</p>
+      <div style="margin-top:14px">${lobby}${err}${warns}</div>
+      <div class="row" style="margin-top:6px">
+        ${m.canLeave ? '<button class="btn danger small" data-act="leave">Remove bot from meeting</button>' : ''}
+        ${m.canCancel ? '<button class="btn danger small" data-act="cancel">Cancel scheduled bot</button>' : ''}
+        ${m.canRetry ? `<button class="btn small" data-act="retry">${m.botId ? 'Sync with bot' : 'Retry sending bot'}</button>` : ''}
+        ${m.canRegenerate && m.stage !== 'generating' ? `<button class="btn small" data-act="regen">${hasMom ? 'Regenerate MOM' : 'Write MOM'}</button>` : ''}
+        ${m.meetingUrl ? `<a class="btn small" href="${esc(m.meetingUrl)}" target="_blank" rel="noopener noreferrer">Open meeting link</a>` : ''}
+        <button class="btn small danger" data-act="delete" style="margin-left:auto">Delete</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tabs noprint">
+        <button data-tab="mom" class="${v.tab === 'mom' ? 'on' : ''}">Minutes (MOM)</button>
+        <button data-tab="tx" class="${v.tab === 'tx' ? 'on' : ''}">Transcript${m.transcript.length ? ` (${m.transcript.length})` : ''}</button>
+        <button data-tab="info" class="${v.tab === 'info' ? 'on' : ''}">Details</button>
+      </div>
+      <div id="tab"></div>
+    </div>`;
+
+  const tab = document.getElementById('tab');
+  if (v.tab === 'mom') {
+    if (!hasMom) {
+      tab.innerHTML = `<div class="empty">${m.stage === 'generating' ? '<span class="spin"></span><br>Writing the minutes… this usually takes under a minute.'
+        : m.stage === 'failed' ? 'No minutes — see the message above.' : m.stage === 'cancelled' ? 'This bot was cancelled.'
+        : 'The minutes will appear here automatically after the meeting ends.'}</div>`;
+    } else if (v.editing) {
+      tab.innerHTML = `<div class="toolbar"><button class="btn primary small" data-act="save">Save changes</button><button class="btn small" data-act="canceledit">Cancel</button><span class="hint">Markdown: # heading, - bullet, **bold**, | tables |</span></div>
+        <textarea class="mdedit" id="mdedit">${esc(m.momMarkdown)}</textarea>`;
+    } else {
+      tab.innerHTML = `<div class="toolbar noprint">
+          <button class="btn small" data-act="edit">Edit</button>
+          <button class="btn small" data-act="copy">Copy</button>
+          <button class="btn small" data-act="word">Word (.doc)</button>
+          <button class="btn small" data-act="mdfile">Markdown</button>
+          <button class="btn small" data-act="print">Print / PDF</button>
+          <button class="btn small" data-act="email">Email</button>
+        </div>
+        ${m.momEdited ? '<div class="hint noprint" style="margin-bottom:8px">Edited manually. “Regenerate MOM” will replace your edits.</div>' : ''}
+        <article class="doc" id="momdoc">${md(m.momMarkdown)}</article>`;
+    }
+  } else if (v.tab === 'tx') {
+    tab.innerHTML = m.transcript.length ? `<div class="toolbar"><button class="btn small" data-act="txfile">Download transcript</button></div>
+      <div class="tx">${m.transcript.map((s) => `<div class="ln"><div class="tm">${esc(s.time)}</div><div><div class="sp">${esc(s.speaker)}</div><div>${esc(s.text)}</div></div></div>`).join('')}</div>`
+      : '<div class="empty">The transcript appears after the meeting ends and is processed.</div>';
+  } else {
+    tab.innerHTML = `<dl class="kv">
+      <dt>Organiser</dt><dd>${esc(m.ownerName)} (${esc(m.ownerEmail)})</dd>
+      <dt>Platform</dt><dd>${esc(m.platform)}</dd>
+      ${m.meetingUrl ? `<dt>Link</dt><dd>${esc(m.meetingUrl)}</dd>` : ''}
+      ${m.botId ? `<dt>Bot ID</dt><dd><code>${esc(m.botId)}</code></dd>` : ''}
+      ${m.agenda ? `<dt>Agenda</dt><dd style="white-space:pre-wrap;word-break:normal">${esc(m.agenda)}</dd>` : ''}
+      ${m.momGeneratedAt ? `<dt>MOM written</dt><dd>${esc(fmt(m.momGeneratedAt))}</dd>` : ''}
+    </dl>
+    <h2 style="margin-top:18px">Bot activity</h2>
+    ${m.statusHistory.length ? `<ul class="timeline">${m.statusHistory.map((h) => `<li>${esc(fmt(h.at))} — ${esc(h.code.replace(/_/g, ' '))}${h.text ? ' · ' + esc(h.text) : ''}</li>`).join('')}</ul>` : '<p class="muted">No activity yet.</p>'}`;
+  }
+
+  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { v.tab = b.dataset.tab; v.editing = false; drawMeeting(true); });
+  app.querySelectorAll('[data-act]').forEach((b) => b.onclick = () => meetingAction(b.dataset.act, b));
+
+  if (first) {
+    clearInterval(state.timer);
+    state.timer = setInterval(() => { if (state.view && state.view.m && ACTIVE(state.view.m.stage)) drawMeeting(false); }, 6000);
+  }
+}
+
+function momHtmlDoc(m) {
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(m.title)}</title>
+  <style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111;line-height:1.45}h1{font-size:18pt}h2{font-size:13pt;border-bottom:1px solid #999;padding-bottom:2pt;margin-top:16pt}h3{font-size:11.5pt}
+  table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:4pt 6pt;text-align:left;vertical-align:top}th{background:#eee}</style></head>
+  <body>${md(m.momMarkdown)}</body></html>`;
+}
+
+async function meetingAction(act, btn) {
+  const v = state.view; const m = v.m;
+  try {
+    switch (act) {
+      case 'leave':
+        if (!confirm('Remove the bot from the meeting now? It will stop recording and write the MOM from what it has.')) return;
+        busy(btn, true); await api('POST', `/api/meetings/${m.id}/leave`); toast('The bot is leaving'); break;
+      case 'cancel':
+        if (!confirm('Cancel this scheduled bot?')) return;
+        busy(btn, true); { const r = await api('POST', `/api/meetings/${m.id}/cancel`); toast(r.stillBookedForTeammates ? 'Removed for you — still booked for a teammate' : 'Cancelled'); } break;
+      case 'retry':
+        busy(btn, true, 'Working…'); await api('POST', `/api/meetings/${m.id}/retry`); toast('Updated'); break;
+      case 'regen':
+        if (m.momEdited && !confirm('Regenerating will replace your manual edits. Continue?')) return;
+        busy(btn, true); await api('POST', `/api/meetings/${m.id}/regenerate`); v.tab = 'mom'; toast('Writing the minutes…'); break;
+      case 'delete':
+        if (!confirm('Delete this meeting, its transcript and minutes? The recording stored by the bot service is deleted too. This cannot be undone.')) return;
+        busy(btn, true); await api('DELETE', `/api/meetings/${m.id}`); toast('Deleted'); go('#/'); return;
+      case 'edit': v.editing = true; break;
+      case 'canceledit': v.editing = false; break;
+      case 'save': {
+        busy(btn, true); const markdown = document.getElementById('mdedit').value;
+        await api('PUT', `/api/meetings/${m.id}/mom`, { markdown }); v.editing = false; toast('Saved'); break;
+      }
+      case 'copy': return copyText(m.momMarkdown);
+      case 'mdfile': return download(`MOM-${slug(m.title)}.md`, m.momMarkdown, 'text/markdown;charset=utf-8');
+      case 'word': return download(`MOM-${slug(m.title)}.doc`, '﻿' + momHtmlDoc(m), 'application/msword');
+      case 'txfile': return download(`Transcript-${slug(m.title)}.txt`, m.transcript.map((s) => `[${s.time}] ${s.speaker}: ${s.text}`).join('\n'), 'text/plain;charset=utf-8');
+      case 'print':
+        document.body.classList.add('printing');
+        setTimeout(() => { window.print(); setTimeout(() => document.body.classList.remove('printing'), 500); }, 50); return;
+      case 'email': {
+        let body = mdToPlain(m.momMarkdown);
+        if (body.length > 1800) { copyText(body); body = body.slice(0, 1700) + '\n\n[Truncated — the full minutes were copied to your clipboard; paste them here.]'; }
+        location.href = `mailto:?subject=${encodeURIComponent('MOM: ' + m.title)}&body=${encodeURIComponent(body)}`; return;
+      }
+    }
+  } catch (e) { toast(e.message, 5000); busy(btn, false); return; }
+  await drawMeeting(true);
+}
+
+/* ---------- calendar & bot ---------- */
+async function viewNotetaker() {
+  const q = state.query;
+  const flash = q.get('connected') ? '<div class="notice good">Calendar connected. Your meetings will appear below within a minute.</div>'
+    : q.get('calendarError') ? `<div class="notice bad">${esc(q.get('calendarError'))}</div>` : '';
+  if (q.get('connected') || q.get('calendarError')) history.replaceState(null, '', '#/notetaker');
+  app.innerHTML = `
+    <h1>Calendar &amp; bot</h1>
+    <p class="sub">Choose how your notetaker appears and let it join your meetings automatically.</p>
+    ${flash}
+    <div class="card">
+      <h2>Your notetaker's name</h2>
+      <div id="nerr"></div>
+      <form id="nf" class="row" style="align-items:flex-end">
+        <div style="flex:1;min-width:220px"><label for="botName" class="mt0" style="margin-top:0">Name shown in the meeting</label>
+          <input id="botName" name="botName" type="text" maxlength="100" value="${esc(state.me.customBotName || state.me.botName)}"></div>
+        <button class="btn">Save</button>
+      </form>
+      <div class="hint">For example “${esc(state.me.name)}” or “${esc(state.me.name)} (Notetaker)”. When it joins, it posts a chat message saying it is your AI notetaker and is recording, so people know.</div>
+    </div>
+    <div class="card" id="calcard"><span class="spin"></span></div>`;
+  const nf = document.getElementById('nf');
+  nf.onsubmit = async (e) => {
+    e.preventDefault(); const btn = nf.querySelector('button'); busy(btn, true);
+    try { state.me = (await api('POST', '/api/me/settings', formData(nf))).user; document.getElementById('botName').value = state.me.customBotName || state.me.botName; toast('Saved'); showError(document.getElementById('nerr'), ''); }
+    catch (err) { showError(document.getElementById('nerr'), err.message); }
+    finally { busy(btn, false); }
+  };
+  await drawCalendar();
+  state.timer = setInterval(() => { if (location.hash.startsWith('#/notetaker') && !document.querySelector('#calcard input:focus')) drawCalendar(true); }, 30000);
+}
+
+async function drawCalendar(quiet) {
+  const box = document.getElementById('calcard'); if (!box) return;
+  let c;
+  try { c = await api('GET', '/api/calendar'); } catch (e) { if (!quiet) box.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; return; }
+  const cal = c.calendar;
+  if (!cal) {
+    const g = c.google && c.oauthReady, o = c.outlook && c.oauthReady;
+    box.innerHTML = `
+      <h2>Connect your calendar</h2>
+      <p class="muted mt0">The bot will join meetings that have a Teams, Zoom, Google Meet or Webex link — you don't need to paste anything.</p>
+      ${g || o ? `<div class="connect">
+        ${g ? '<a class="btn primary" href="/api/calendar/connect/google">Connect Google Calendar</a>' : ''}
+        ${o ? '<a class="btn primary" href="/api/calendar/connect/outlook">Connect Outlook / Microsoft 365</a>' : ''}
+      </div><div class="or">or use a calendar link</div>` : ''}
+      <div id="cerr"></div>
+      <form id="cf">
+        <label for="icsUrl" ${g || o ? '' : 'class="mt0" style="margin-top:0"'}>Your calendar's private link (iCal / .ics)</label>
+        <div class="pastebox"><input id="icsUrl" name="url" type="text" required placeholder="https://… .ics" autocomplete="off"><button class="btn primary">Connect</button></div>
+        <label style="font-weight:400;display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" name="manual" value="1"> Let me pick meetings one by one (instead of joining all)</label>
+      </form>
+      <details class="help"><summary>Where do I find this link?</summary>
+        <p><b>Outlook / Microsoft 365:</b></p>
+        <ol><li>Open Outlook on the web → Settings (gear) → Calendar → <b>Shared calendars</b>.</li>
+        <li>Under “Publish a calendar”, choose your Calendar and <b>Can view all details</b>, then <b>Publish</b>.</li>
+        <li>Copy the <b>ICS</b> link and paste it here.</li></ol>
+        <p>If “Publish a calendar” is missing, your company has switched it off — ask your admin to set up “Connect Outlook” instead.</p>
+        <p><b>Google Calendar:</b></p>
+        <ol><li>Open Google Calendar → Settings → click your calendar on the left.</li>
+        <li>Scroll to <b>Secret address in iCal format</b>, copy it and paste it here.</li></ol>
+        <p>Keep this link private: anyone who has it can see your calendar.</p>
+      </details>`;
+    const cf = document.getElementById('cf');
+    cf.onsubmit = async (e) => {
+      e.preventDefault(); const btn = cf.querySelector('button'); busy(btn, true, 'Checking…');
+      const d = formData(cf);
+      try { await api('POST', '/api/calendar/ics', { url: d.url, autoJoin: d.manual ? 'manual' : 'all' }); toast('Calendar connected'); drawCalendar(); }
+      catch (err) { showError(document.getElementById('cerr'), err.message); busy(btn, false); }
+    };
+    return;
+  }
+  const src = cal.type === 'ics' ? `calendar link (${esc(cal.icsHost || '')})` : `${cal.provider === 'google' ? 'Google Calendar' : 'Outlook'}${cal.email ? ' · ' + esc(cal.email) : ''}`;
+  const status = cal.type === 'recall' && cal.status && cal.status !== 'connected' ? ` · <span class="chip ${cal.status === 'disconnected' ? 'bad' : 'wait'}">${esc(cal.status)}</span>` : '';
+  const rows = cal.upcoming.map((e) => {
+    const chipHtml = e.meetingId && e.stage ? `<a href="#/m/${esc(e.meetingId)}" class="chip ${e.stage === 'scheduled' ? 'live' : e.stage === 'completed' ? 'done' : e.stage === 'failed' ? 'bad' : 'wait'}" style="text-decoration:none">${e.stage === 'scheduled' ? 'Booked' : esc(e.stage.replace(/_/g, ' '))}</a>` : '';
+    return `<div class="item">
+      <div class="grow"><div class="t">${esc(e.title)}</div><div class="m">${esc(fmt(e.start))} · ${esc(e.platform || '')}</div></div>
+      ${chipHtml}
+      <label class="switch" title="${e.join ? 'Bot will join' : 'Bot will not join'}"><input type="checkbox" data-key="${esc(e.key)}" ${e.join ? 'checked' : ''} aria-label="Send bot to ${esc(e.title)}"><span></span></label>
+    </div>`; }).join('');
+  box.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><h2 style="margin-bottom:4px">Calendar connected</h2><div class="muted" style="font-size:14px">${src}${status}</div></div>
+      <div class="row"><button class="btn small" id="sync">Refresh now</button><button class="btn small danger" id="disc">Disconnect</button></div>
+    </div>
+    ${cal.lastError ? `<div class="notice bad" style="margin-top:12px">${esc(cal.lastError)}</div>` : ''}
+    <label>Which meetings should it join?</label>
+    <div class="seg" id="mode"><button type="button" data-v="all" class="${cal.autoJoin !== 'manual' ? 'on' : ''}">All meetings with a link</button><button type="button" data-v="manual" class="${cal.autoJoin === 'manual' ? 'on' : ''}">Only ones I switch on</button></div>
+    <div class="hint">Declined, cancelled and all-day events are skipped. Bots are booked up to ${c.lookaheadHours} hours ahead${cal.type === 'ics' ? ` and the calendar is checked every ${c.pollMinutes} minutes` : ' and updates arrive automatically'}.${cal.lastSyncAt ? ' Last checked ' + esc(ago(cal.lastSyncAt)) + '.' : ''}</div>
+    <h2 style="margin-top:20px">Upcoming meetings with a link</h2>
+    <div class="list">${rows || '<div class="empty">No upcoming meetings with a Teams, Zoom, Meet or Webex link in the next 7 days.</div>'}</div>`;
+  document.getElementById('sync').onclick = async (e) => { busy(e.currentTarget, true); try { await api('POST', '/api/calendar/sync'); toast('Calendar refreshed'); } catch (err) { toast(err.message, 5000); } drawCalendar(); };
+  document.getElementById('disc').onclick = async (e) => {
+    if (!confirm('Disconnect your calendar? Bots already booked from it will be cancelled.')) return;
+    busy(e.currentTarget, true); try { await api('DELETE', '/api/calendar'); toast('Disconnected'); } catch (err) { toast(err.message, 5000); } drawCalendar();
+  };
+  document.getElementById('mode').onclick = async (e) => {
+    const b = e.target.closest('button'); if (!b || b.classList.contains('on')) return;
+    try { await api('POST', '/api/calendar/settings', { autoJoin: b.dataset.v }); toast('Saved'); } catch (err) { toast(err.message, 5000); }
+    drawCalendar();
+  };
+  box.querySelectorAll('input[data-key]').forEach((cb) => cb.onchange = async () => {
+    cb.disabled = true;
+    try { await api('POST', '/api/calendar/toggle', { key: cb.dataset.key, join: cb.checked }); toast(cb.checked ? 'The bot will join' : 'The bot will skip this one'); }
+    catch (err) { toast(err.message, 5000); }
+    drawCalendar(true);
+  });
+}
+
+/* ---------- import transcript ---------- */
+function viewImport() {
+  app.innerHTML = `
+    <h1>Import a transcript</h1>
+    <p class="sub">If the bot could not join (for example your organisation blocks external participants), download the meeting transcript from Teams/Zoom and turn it into a MOM here.</p>
+    ${state.config && !state.config.aiConfigured ? '<div class="notice warn">AI is not configured on the server yet.</div>' : ''}
+    <div class="card">
+      <div id="err"></div>
+      <form id="f">
+        <label for="title">Meeting title</label><input id="title" name="title" type="text" required maxlength="200">
+        <label for="agenda">Agenda <span class="opt">(optional)</span></label><textarea id="agenda" name="agenda" maxlength="5000" style="min-height:70px"></textarea>
+        <label for="file">Transcript file <span class="opt">(.vtt or .txt)</span></label><input id="file" type="file" accept=".vtt,.txt,.srt,text/plain,text/vtt">
+        <label for="transcript">…or paste the transcript</label>
+        <textarea id="transcript" name="transcript" style="min-height:220px" placeholder="Priya: Let's start with the Q3 numbers&#10;Rahul: Sure, revenue is up 12%…"></textarea>
+        <div class="hint">Accepts “Name: words” lines and Teams/Zoom WebVTT exports.</div>
+        <div style="margin-top:18px"><button class="btn primary">Create MOM</button></div>
+      </form>
+    </div>`;
+  document.getElementById('file').onchange = async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    if (file.size > 2.5 * 1024 * 1024) { toast('File is too large (max 2.5 MB)'); return; }
+    document.getElementById('transcript').value = await file.text();
+    if (!document.getElementById('title').value) document.getElementById('title').value = file.name.replace(/\.[^.]+$/, '');
+  };
+  const f = document.getElementById('f');
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const btn = f.querySelector('button.primary'); busy(btn, true, 'Uploading…');
+    try { const r = await api('POST', '/api/meetings/manual', formData(f)); go(`#/m/${r.meeting.id}`); }
+    catch (err) { showError(document.getElementById('err'), err.message); }
+    finally { busy(btn, false); }
+  };
+}
+
+/* ---------- admin ---------- */
+async function viewAdmin() {
+  if (state.me.role !== 'admin') return go('#/');
+  const c = state.config || {};
+  app.innerHTML = `
+    <h1>Team &amp; invites</h1>
+    <p class="sub">Only people you invite can sign in and send the bot to meetings.</p>
+    ${configNotices()}
+    <div class="grid2">
+      <div class="card">
+        <h2>Create an invite link</h2>
+        <div id="err"></div>
+        <form id="f">
+          <label for="email">Email <span class="opt">(recommended — locks the invite to this person)</span></label>
+          <input id="email" name="email" type="email" placeholder="colleague@company.com">
+          <div class="row" style="gap:12px">
+            <div style="flex:1;min-width:140px"><label for="role">Role</label><select id="role" name="role"><option value="member">Member</option><option value="admin">Admin</option></select></div>
+            <div style="flex:1;min-width:140px"><label for="days">Valid for (days)</label><input id="days" name="days" type="number" min="1" max="30" value="7"></div>
+          </div>
+          <div style="margin-top:16px"><button class="btn primary">Create invite</button></div>
+        </form>
+        <div id="newlink"></div>
+      </div>
+      <div class="card">
+        <h2>Server status</h2>
+        <dl class="kv">
+          <dt>Meeting bot</dt><dd>${c.recallConfigured ? '✅ Configured' : '⚠️ RECALL_API_KEY missing'}</dd>
+          <dt>Webhooks</dt><dd>${c.webhookVerificationConfigured ? '✅ Verification secret set' : '⚠️ RECALL_VERIFICATION_SECRET missing'}</dd>
+          <dt>AI (MOM)</dt><dd>${c.aiConfigured ? `✅ ${esc(c.aiProvider)}` : '⚠️ Not configured'}</dd>
+          <dt>Calendar sign-in</dt><dd>Google ${c.calendarSignIn && c.calendarSignIn.google ? '✅' : '— not set up'} · Outlook ${c.calendarSignIn && c.calendarSignIn.outlook ? '✅' : '— not set up'}<div class="hint">Calendar links (.ics) always work without this.</div></dd>
+          <dt>Webhook URL</dt><dd><code>${esc(c.webhookUrl || '')}</code></dd>
+        </dl>
+        <p class="hint">Add the webhook URL in the Recall.ai dashboard (Webhooks) and subscribe to bot.*, recording.done, recording.failed, transcript.done, transcript.failed, calendar.update and calendar.sync_events.</p>
+      </div>
+    </div>
+    <div class="card"><h2>Invites</h2><div id="invites"><span class="spin"></span></div></div>
+    <div class="card"><h2>Users</h2><div id="users"><span class="spin"></span></div></div>`;
+
+  const f = document.getElementById('f');
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const btn = f.querySelector('button'); busy(btn, true);
+    try {
+      const r = await api('POST', '/api/admin/invites', formData(f));
+      document.getElementById('newlink').innerHTML = `<div class="notice good" style="margin-top:16px">Invite created${r.email ? ' for ' + esc(r.email) : ''}. Share this link privately — it works once and expires ${esc(fmt(r.expiresAt))}.
+        <div class="linkbox"><input type="text" readonly value="${esc(r.link)}" id="lnk"><button class="btn small" type="button" id="cp">Copy</button></div></div>`;
+      document.getElementById('cp').onclick = () => copyText(r.link);
+      f.reset(); showError(document.getElementById('err'), ''); loadAdminLists();
+    } catch (err) { showError(document.getElementById('err'), err.message); }
+    finally { busy(btn, false); }
+  };
+  loadAdminLists();
+}
+
+async function loadAdminLists() {
+  try {
+    const [{ invites }, { users }] = await Promise.all([api('GET', '/api/admin/invites'), api('GET', '/api/admin/users')]);
+    document.getElementById('invites').innerHTML = invites.length ? `<table class="plain"><thead><tr><th>For</th><th>Role</th><th>Status</th><th>Expires</th><th></th></tr></thead><tbody>
+      ${invites.map((i) => `<tr><td>${esc(i.email || 'Anyone with the link')}${i.usedBy ? `<div class="hint">used by ${esc(i.usedBy)}</div>` : ''}</td><td>${esc(i.role)}</td>
+      <td><span class="chip ${i.status === 'active' ? 'live' : i.status === 'used' ? 'done' : ''}">${esc(i.status)}</span></td><td>${esc(fmt(i.expiresAt))}</td>
+      <td>${i.status === 'active' ? `<button class="btn small danger" data-revoke="${esc(i.id)}">Revoke</button>` : ''}</td></tr>`).join('')}</tbody></table>`
+      : '<div class="empty">No invites yet.</div>';
+    document.getElementById('users').innerHTML = `<table class="plain"><thead><tr><th>Name</th><th>Role</th><th>Last sign-in</th><th></th></tr></thead><tbody>
+      ${users.map((u) => `<tr><td>${esc(u.name)}<div class="hint">${esc(u.email)}</div></td><td>${esc(u.role)}${u.disabled ? ' <span class="chip bad">disabled</span>' : ''}</td>
+      <td>${esc(u.lastLoginAt ? fmt(u.lastLoginAt) : '—')}</td>
+      <td style="text-align:right">${u.id === state.me.id ? '<span class="hint">you</span>' : `
+        <button class="btn small" data-role="${esc(u.id)}" data-to="${u.role === 'admin' ? 'member' : 'admin'}">${u.role === 'admin' ? 'Make member' : 'Make admin'}</button>
+        <button class="btn small ${u.disabled ? '' : 'danger'}" data-dis="${esc(u.id)}" data-to="${u.disabled ? 'false' : 'true'}">${u.disabled ? 'Enable' : 'Disable'}</button>`}</td></tr>`).join('')}</tbody></table>`;
+    app.querySelectorAll('[data-revoke]').forEach((b) => b.onclick = async () => {
+      if (!confirm('Revoke this invite link?')) return;
+      try { await api('DELETE', `/api/admin/invites/${b.dataset.revoke}`); loadAdminLists(); } catch (e) { toast(e.message); }
+    });
+    app.querySelectorAll('[data-dis]').forEach((b) => b.onclick = async () => {
+      const disabled = b.dataset.to === 'true';
+      if (disabled && !confirm('Disable this user? They will be signed out immediately.')) return;
+      try { await api('POST', `/api/admin/users/${b.dataset.dis}/status`, { disabled }); loadAdminLists(); } catch (e) { toast(e.message); }
+    });
+    app.querySelectorAll('[data-role]').forEach((b) => b.onclick = async () => {
+      try { await api('POST', `/api/admin/users/${b.dataset.role}/status`, { role: b.dataset.to }); loadAdminLists(); } catch (e) { toast(e.message); }
+    });
+  } catch (e) { document.getElementById('invites').innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; }
+}
+
+/* ---------- account ---------- */
+function viewAccount() {
+  const me = state.me;
+  app.innerHTML = `
+    <h1>Your account</h1><p class="sub">${esc(me.name)} · ${esc(me.email)} · ${esc(me.role)}</p>
+    <div class="card" style="max-width:480px">
+      <h2>Change password</h2><div id="err"></div>
+      <form id="f">
+        <label for="cur">Current password</label><input id="cur" name="currentPassword" type="password" required autocomplete="current-password">
+        <label for="np">New password <span class="opt">(10+ characters)</span></label><input id="np" name="newPassword" type="password" minlength="10" required autocomplete="new-password">
+        <div style="margin-top:16px"><button class="btn primary">Update password</button></div>
+      </form>
+      <p class="hint">Changing your password signs you out on other devices.</p>
+    </div>
+    <button class="btn" id="out">Sign out</button>`;
+  const f = document.getElementById('f');
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const btn = f.querySelector('button'); busy(btn, true);
+    try { await api('POST', '/api/me/password', formData(f)); f.reset(); toast('Password updated'); showError(document.getElementById('err'), ''); }
+    catch (err) { showError(document.getElementById('err'), err.message); }
+    finally { busy(btn, false); }
+  };
+  document.getElementById('out').onclick = async () => { await api('POST', '/api/logout').catch(() => {}); state.me = null; go('#/login'); };
+}
+
+render();
+</script>
+</body>
+</html>

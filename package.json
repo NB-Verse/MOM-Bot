@@ -1,0 +1,15 @@
+{
+  "name": "mom-bot",
+  "version": "1.0.0",
+  "description": "Invite-only AI meeting notetaker that joins Teams, Zoom, Google Meet and Webex meetings and writes the Minutes of Meeting (MOM).",
+  "main": "server.js",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  }
+}
